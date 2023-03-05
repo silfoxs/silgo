@@ -1,0 +1,8 @@
+app:
+  env: "dev"
+  mode: "debug"
+  port: 9301
+mysql:
+  read:
+    host: 127.0.0.1
+    port: 3306
