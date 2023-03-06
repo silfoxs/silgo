@@ -1,7 +1,7 @@
 app:
   env: "prod"
   mode: "release"
-  port: 9301
+  port: 9302
 mysql:
   read:
     host: 127.0.0.1

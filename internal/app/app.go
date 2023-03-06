@@ -12,8 +12,8 @@ import (
 )
 
 func Run() {
-	server := gin.New()
 	gin.SetMode(viper.GetString("app.mode"))
+	server := gin.New()
 	server.Use(gin.Logger())
 	server.Use(gin.Recovery())
 	server.GET("/ping", func(c *gin.Context) {
