@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 
 	"time"
@@ -8,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/silfoxs/silgo/pkg/shutdown"
 	"github.com/spf13/viper"
 )
 
@@ -28,7 +30,21 @@ func Run() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	if err := s.ListenAndServe(); err != nil {
-		fmt.Println(err.Error())
-	}
+	go func() {
+		if err := s.ListenAndServe(); err != nil {
+			fmt.Println(err.Error())
+		}
+	}()
+	shutdown.NewHook().Close(
+		func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+
+			if err := s.Shutdown(ctx); err != nil {
+				fmt.Println("server shutdown err" + err.Error())
+			} else {
+				fmt.Println("server shutdown success")
+			}
+		},
+	)
 }
