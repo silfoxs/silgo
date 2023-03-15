@@ -25,18 +25,19 @@ func (l *Logger) SetOptions(opt Options) {
 	l.opt = opt
 }
 
-func (l *Logger) GetEncoder() zapcore.Encoder {
+func (l *Logger) GetEncoderConfig() zapcore.EncoderConfig {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-	return zapcore.NewConsoleEncoder(encoderConfig)
+	return encoderConfig
+}
+
+func (l *Logger) GetEncoder() zapcore.Encoder {
+	return zapcore.NewConsoleEncoder(l.GetEncoderConfig())
 }
 
 func (l *Logger) JsonEncoder() zapcore.Encoder {
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-	return zapcore.NewJSONEncoder(encoderConfig)
+	return zapcore.NewJSONEncoder(l.GetEncoderConfig())
 }
 
 func (l *Logger) GetLogWriter() zapcore.WriteSyncer {

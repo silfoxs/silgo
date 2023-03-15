@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"time"
 
@@ -17,14 +18,14 @@ import (
 )
 
 func Run() {
+	log := logger.New(s_log.Options{
+		FileName: viper.GetString("log.path"),
+	})
 	gin.SetMode(viper.GetString("app.mode"))
 	server := gin.New()
 	server.Use(gin.Logger())
 	server.Use(gin.Recovery())
 	server.GET("/ping", func(c *gin.Context) {
-		log := logger.New(s_log.Options{
-			FileName: viper.GetString("log.path"),
-		})
 		json_str, _ := json.Marshal(map[string]interface{}{
 			"path": viper.AllSettings(),
 		})
@@ -40,9 +41,11 @@ func Run() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
+	log.Infof("pid:%d server start", os.Getpid())
 	go func() {
 		if err := s.ListenAndServe(); err != nil {
-			fmt.Println(err.Error())
+			log.Errorf("pid:%d %s", os.Getpid(), err.Error())
 		}
 	}()
 	shutdown.NewHook().Close(
@@ -51,9 +54,9 @@ func Run() {
 			defer cancel()
 
 			if err := s.Shutdown(ctx); err != nil {
-				fmt.Println("server shutdown err" + err.Error())
+				log.Errorf("pid:%d server close err %s", err.Error(), os.Getpid())
 			} else {
-				fmt.Println("server shutdown success")
+				log.Infof("pid:%d server close success", os.Getpid())
 			}
 		},
 	)
