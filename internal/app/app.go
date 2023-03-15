@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"time"
@@ -9,6 +10,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/silfoxs/silgo/internal/pkg/logger"
+	s_log "github.com/silfoxs/silgo/pkg/logger"
 	"github.com/silfoxs/silgo/pkg/shutdown"
 	"github.com/spf13/viper"
 )
@@ -19,6 +22,13 @@ func Run() {
 	server.Use(gin.Logger())
 	server.Use(gin.Recovery())
 	server.GET("/ping", func(c *gin.Context) {
+		log := logger.New(s_log.Options{
+			FileName: viper.GetString("log.path"),
+		})
+		json_str, _ := json.Marshal(map[string]interface{}{
+			"path": viper.AllSettings(),
+		})
+		log.Info(string(json_str))
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "pong",
 		})
