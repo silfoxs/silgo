@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"os"
 
@@ -10,7 +9,7 @@ import (
 
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/silfoxs/silgo/internal/app/router"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
 	s_log "github.com/silfoxs/silgo/pkg/logger"
 	"github.com/silfoxs/silgo/pkg/shutdown"
@@ -18,22 +17,19 @@ import (
 )
 
 func Run() {
+	pid := os.Getpid()
 	log := logger.New(s_log.Options{
 		FileName: viper.GetString("log.path"),
 	})
-	gin.SetMode(viper.GetString("app.mode"))
-	server := gin.New()
-	server.Use(gin.Logger())
-	server.Use(gin.Recovery())
-	server.GET("/ping", func(c *gin.Context) {
-		json_str, _ := json.Marshal(map[string]interface{}{
-			"path": viper.AllSettings(),
-		})
-		log.Info(string(json_str))
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "pong",
-		})
+	server, err := router.NewRouter(router.Options{
+		Mode:   viper.GetString("app.mode"),
+		Logger: log,
 	})
+	if err != nil {
+		log.Panicf("pid:%d server start error: %s", pid, err.Error())
+	}
+
+	log.Infof("pid:%d server start", pid)
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", viper.GetInt("app.port")),
 		Handler:        server,
@@ -41,11 +37,9 @@ func Run() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-
-	log.Infof("pid:%d server start", os.Getpid())
 	go func() {
 		if err := s.ListenAndServe(); err != nil {
-			log.Errorf("pid:%d %s", os.Getpid(), err.Error())
+			log.Errorf("pid:%d %s", pid, err.Error())
 		}
 	}()
 	shutdown.NewHook().Close(
@@ -54,9 +48,9 @@ func Run() {
 			defer cancel()
 
 			if err := s.Shutdown(ctx); err != nil {
-				log.Errorf("pid:%d server close err %s", err.Error(), os.Getpid())
+				log.Errorf("pid:%d server close err %s", err.Error(), pid)
 			} else {
-				log.Infof("pid:%d server close success", os.Getpid())
+				log.Infof("pid:%d server close success", pid)
 			}
 		},
 	)
