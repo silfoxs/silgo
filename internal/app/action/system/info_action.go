@@ -1,4 +1,4 @@
-package action
+package system
 
 import (
 	"encoding/json"
@@ -13,10 +13,12 @@ type Request struct {
 }
 
 type Response struct {
-	Id int32 `json:"id"` // 主键ID
+	Connection      string `json:"connection"` // 主键ID
+	SecChUaPlatform string `json:"sec-ch-ua-platform"`
+	UserAgent       string `json:"User-Agent"`
 }
 
-func (a *Action) Ping(c *gin.Context) {
+func (a *Action) Info(c *gin.Context) {
 	req := new(Request)
 	if err := c.ShouldBindQuery(req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -29,7 +31,9 @@ func (a *Action) Ping(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "",
 		"data": &Response{
-			Id: req.Id,
+			Connection:      c.GetHeader("connection"),
+			SecChUaPlatform: c.GetHeader("sec-ch-ua-platform"),
+			UserAgent:       c.GetHeader("User-Agent"),
 		},
 	})
 }
