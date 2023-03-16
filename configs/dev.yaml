@@ -3,12 +3,17 @@ app:
   mode: "debug"
   port: 9302
 log:
-  path: './logs/silgo/silgo-api.log'
+  path: './logs/silgo-api.log'
 mysql:
   read:
     host: 127.0.0.1
     port: 3306
+    username: 'root'
+    password: 123456
+    database: 'test'
 redis:
   test:
     host: 127.0.0.1
     port: 6379
+    username: 'root'
+    password: 123456

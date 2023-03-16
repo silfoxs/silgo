@@ -10,20 +10,26 @@ import (
 	"fmt"
 
 	"github.com/silfoxs/silgo/internal/app/router"
+	"github.com/silfoxs/silgo/internal/pkg/database"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
 	s_log "github.com/silfoxs/silgo/pkg/logger"
 	"github.com/silfoxs/silgo/pkg/shutdown"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
+)
+
+var (
+	log    *logger.Logger
+	readDb *gorm.DB
 )
 
 func Run() {
+	initServer()
 	pid := os.Getpid()
-	log := logger.New(s_log.Options{
-		FileName: viper.GetString("log.path"),
-	})
 	server, err := router.NewRouter(router.Options{
 		Mode:   viper.GetString("app.mode"),
 		Logger: log,
+		ReadDb: readDb,
 	})
 	if err != nil {
 		log.Panicf("pid:%d server start error: %s", pid, err.Error())
@@ -48,10 +54,29 @@ func Run() {
 			defer cancel()
 
 			if err := s.Shutdown(ctx); err != nil {
-				log.Errorf("pid:%d server close err %s", err.Error(), pid)
+				log.Errorf("pid:%d server close err %s", pid, err.Error())
 			} else {
 				log.Infof("pid:%d server close success", pid)
 			}
 		},
 	)
+}
+
+func initServer() {
+	log = logger.New(s_log.Options{
+		FileName:  viper.GetString("log.path"),
+		Compress:  true,
+		LocalTime: true,
+	})
+	var err error
+	readDb, err = database.New(database.Options{
+		Host:     viper.GetString("mysql.read.host"),
+		Port:     viper.GetInt("mysql.read.port"),
+		UserName: viper.GetString("mysql.read.username"),
+		Password: viper.GetString("mysql.read.password"),
+		Database: viper.GetString("mysql.read.database"),
+	})
+	if err != nil {
+		log.Panicf("database server connection err %s", err.Error())
+	}
 }

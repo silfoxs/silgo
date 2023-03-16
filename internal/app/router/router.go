@@ -4,13 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/silfoxs/silgo/internal/app/action/system"
+	"github.com/silfoxs/silgo/internal/app/action/user"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
+	"gorm.io/gorm"
 )
 
 type Options struct {
 	Mode   string
 	Logger *logger.Logger
+	ReadDb *gorm.DB
 }
 
 func NewRouter(options Options) (*gin.Engine, error) {
@@ -18,10 +20,11 @@ func NewRouter(options Options) (*gin.Engine, error) {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	system := system.New(system.Options{
+	userAction := user.New(user.Options{
 		Logger: options.Logger,
+		ReadDb: options.ReadDb,
 	})
-	r.GET("/system/info", system.Info)
+	r.GET("/user/info", userAction.Info)
 
 	r.NoMethod(noMethod)
 	r.NoRoute(noRoute)

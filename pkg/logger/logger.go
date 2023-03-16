@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Options struct {
@@ -14,6 +14,7 @@ type Options struct {
 	MaxSize    int
 	MaxBackups int
 	MaxAge     int
+	LocalTime  bool
 	Compress   bool
 }
 
@@ -50,7 +51,8 @@ func (l *Logger) GetLogWriter() zapcore.WriteSyncer {
 		MaxSize:    1,
 		MaxBackups: 5,
 		MaxAge:     30,
-		Compress:   false,
+		LocalTime:  l.opt.LocalTime,
+		Compress:   l.opt.Compress,
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
@@ -60,6 +62,7 @@ func New(opt Options) *zap.SugaredLogger {
 	return zap.New(
 		zapcore.NewCore(logger.GetEncoder(), logger.GetLogWriter(), zapcore.DebugLevel),
 		zap.AddCaller(),
+		zap.AddCallerSkip(1),
 	).Sugar()
 }
 
@@ -68,5 +71,6 @@ func NewJson(opt Options) *zap.SugaredLogger {
 	return zap.New(
 		zapcore.NewCore(logger.JsonEncoder(), logger.GetLogWriter(), zapcore.DebugLevel),
 		zap.AddCaller(),
+		zap.AddCallerSkip(1),
 	).Sugar()
 }

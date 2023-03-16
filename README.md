@@ -21,7 +21,7 @@ golang >= 1.19
 > git clone git@github.com:silfoxs/silgo.git
 > cd silgo
 > go mod tidy
-> go go run main.go silgo-api
+> go run main.go silgo-api
 
 Using config file: ./configs/dev.yaml
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
