@@ -21,10 +21,13 @@ type User struct {
 	UserName string `json:"user_name"`
 }
 
-func (u *UserRepository) Info(id int32) User {
+func (u *UserRepository) Info(id int32) (User, error) {
 	var ret User
-	u.readDb.Where("id=?", id).First(&ret)
-	return ret
+	if err := u.readDb.Where("id=?", id).First(&ret).Error; err != nil {
+		u.logger.Errorf("user id %d info error: %s", id, err.Error())
+		return ret, err
+	}
+	return ret, nil
 }
 
 func New(options Options) *UserRepository {
