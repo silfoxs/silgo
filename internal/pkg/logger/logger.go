@@ -68,9 +68,3 @@ func (l *Logger) Fatal(args ...any) {
 func (l *Logger) Fatalf(template string, args ...any) {
 	l.logger.Fatalf(template, args...)
 }
-
-func New(opt s_logger.Options) *Logger {
-	logger := &Logger{}
-	logger.Default(opt)
-	return logger
-}

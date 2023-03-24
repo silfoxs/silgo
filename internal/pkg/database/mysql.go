@@ -45,26 +45,3 @@ func (m *Mysql) New() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(10 * time.Second) // 10秒钟
 	return db, nil
 }
-
-type Options struct {
-	Host     string
-	Port     int
-	UserName string
-	Password string
-	Database string
-}
-
-func New(opt Options) (*gorm.DB, error) {
-	db := &Mysql{
-		Host:     opt.Host,
-		Port:     opt.Port,
-		UserName: opt.UserName,
-		Password: opt.Password,
-		Database: opt.Database,
-	}
-	con, err := db.New()
-	if err != nil {
-		return nil, err
-	}
-	return con, nil
-}
