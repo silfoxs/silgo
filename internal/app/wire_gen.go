@@ -8,6 +8,7 @@ package app
 
 import (
 	"github.com/silfoxs/silgo/internal/pkg/database"
+	"github.com/silfoxs/silgo/internal/pkg/http"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
 )
 
@@ -23,9 +24,15 @@ func BuildInjector() (*Injector, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
+	server, err := http.NewHttp(loggerLogger, db)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	injector := &Injector{
 		Logger: loggerLogger,
 		Db:     db,
+		Server: server,
 	}
 	return injector, func() {
 		cleanup()

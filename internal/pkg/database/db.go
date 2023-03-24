@@ -1,12 +1,9 @@
 package database
 
 import (
-	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
-
-var DbSet = wire.NewSet(New)
 
 func New() (*gorm.DB, error) {
 	db := &Mysql{
