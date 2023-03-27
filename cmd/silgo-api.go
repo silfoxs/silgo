@@ -21,7 +21,7 @@ var (
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "./configs/dev.yaml", "config file (default is $HOME/prod.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "./configs/dev.yaml", "config file (default is ./configs/dev.yaml)")
 	rootCmd.AddCommand(silgoApiCmd)
 }
 
