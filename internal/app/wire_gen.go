@@ -50,9 +50,7 @@ func BuildInjector() (*Injector, func(), error) {
 	}
 	injector := &Injector{
 		Logger: loggerLogger,
-		Db:     db,
 		Server: server,
-		router: routerRouter,
 	}
 	return injector, func() {
 		cleanup3()

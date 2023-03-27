@@ -1,10 +1,7 @@
 package app
 
 import (
-	"context"
 	"os"
-
-	"time"
 
 	"fmt"
 
@@ -13,7 +10,7 @@ import (
 
 func Run() {
 	pid := os.Getpid()
-	injector, _, err := BuildInjector()
+	injector, clearup, err := BuildInjector()
 	if err != nil {
 		panic(
 			fmt.Sprintf("pid:%d build injector error: %s", pid, err.Error()),
@@ -25,15 +22,6 @@ func Run() {
 		}
 	}()
 	shutdown.NewHook().Close(
-		func() {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-			defer cancel()
-
-			if err := injector.Server.Shutdown(ctx); err != nil {
-				injector.Logger.Errorf("pid:%d server close err %s", pid, err.Error())
-			} else {
-				injector.Logger.Infof("pid:%d server close success", pid)
-			}
-		},
+		clearup,
 	)
 }

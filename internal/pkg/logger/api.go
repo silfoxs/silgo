@@ -12,5 +12,7 @@ func New() (*Logger, func(), error) {
 		Compress:  true,
 		LocalTime: true,
 	})
-	return logger, nil, nil
+	clearup := func() {
+	}
+	return logger, clearup, nil
 }

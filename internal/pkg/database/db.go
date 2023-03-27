@@ -17,5 +17,7 @@ func New() (*gorm.DB, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return con, nil, nil
+	clearup := func() {
+	}
+	return con, clearup, nil
 }
