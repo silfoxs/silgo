@@ -1,29 +1,14 @@
 package user
 
 import (
+	"github.com/google/wire"
 	"github.com/silfoxs/silgo/internal/app/service/user"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
-	"gorm.io/gorm"
 )
 
-type Options struct {
-	Logger *logger.Logger
-	ReadDb *gorm.DB
-}
+var UserActionSet = wire.NewSet(wire.Struct(new(Action), "*"))
 
 type Action struct {
-	logger      *logger.Logger
-	readDb      *gorm.DB
-	userService *user.UserService
-}
-
-func New(options Options) *Action {
-	return &Action{
-		logger: options.Logger,
-		readDb: options.ReadDb,
-		userService: user.New(user.Options{
-			Logger: options.Logger,
-			ReadDb: options.ReadDb,
-		}),
-	}
+	Logger      *logger.Logger
+	UserService *user.UserService
 }

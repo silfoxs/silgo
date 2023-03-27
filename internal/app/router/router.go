@@ -4,41 +4,45 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"github.com/silfoxs/silgo/internal/app/action/user"
-	"github.com/silfoxs/silgo/internal/pkg/logger"
-	"gorm.io/gorm"
+	"github.com/spf13/viper"
 )
 
-type Options struct {
-	Mode   string
-	Logger *logger.Logger
-	ReadDb *gorm.DB
+var RouterSet = wire.NewSet(wire.Struct(new(Router), "*"))
+
+type Router struct {
+	UserAction user.Action
 }
 
-func NewRouter(options Options) (*gin.Engine, error) {
-	gin.SetMode(options.Mode)
-	r := gin.New()
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
-	userAction := user.New(user.Options{
-		Logger: options.Logger,
-		ReadDb: options.ReadDb,
-	})
-	r.GET("/user/info", userAction.Info)
-
-	r.NoMethod(noMethod)
-	r.NoRoute(noRoute)
-	return r, nil
+func (r *Router) GetEngine() (*gin.Engine, error) {
+	gin.SetMode(viper.GetString("app.mode"))
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	return router, nil
 }
 
-func noMethod(c *gin.Context) {
+func (r *Router) Handler() (*gin.Engine, error) {
+	router, err := r.GetEngine()
+	if err != nil {
+		return nil, err
+	}
+	router.GET("/user/info", r.UserAction.Info)
+
+	router.NoMethod(r.noMethod)
+	router.NoRoute(r.noRoute)
+	return router, nil
+}
+
+func (r *Router) noMethod(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 404,
 		"msg":  "request not allow method",
 	})
 }
 
-func noRoute(c *gin.Context) {
+func (r *Router) noRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 404,
 		"msg":  "request uri not exists",

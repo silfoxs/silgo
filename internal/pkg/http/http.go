@@ -10,23 +10,19 @@ import (
 	"github.com/silfoxs/silgo/internal/app/router"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
 	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
-func NewHttp(log *logger.Logger, db *gorm.DB) (*http.Server, error) {
-	server, err := router.NewRouter(router.Options{
-		Mode:   viper.GetString("app.mode"),
-		Logger: log,
-		ReadDb: db,
-	})
+func NewHttp(log *logger.Logger, router *router.Router) (*http.Server, func(), error) {
+	server, err := router.Handler()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return &http.Server{
 		Addr:           fmt.Sprintf(":%d", viper.GetInt("app.port")),
 		Handler:        server,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    30 * time.Second,
+		WriteTimeout:   30 * time.Second,
+		IdleTimeout:    30 * time.Second,
 		MaxHeaderBytes: 1 << 20,
-	}, nil
+	}, nil, nil
 }

@@ -1,18 +1,16 @@
 package user
 
 import (
+	"github.com/google/wire"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
 	"gorm.io/gorm"
 )
 
-type Options struct {
-	Logger *logger.Logger
-	ReadDb *gorm.DB
-}
+var UserRepositorySet = wire.NewSet(wire.Struct(new(UserRepository), "*"))
 
 type UserRepository struct {
-	logger *logger.Logger
-	readDb *gorm.DB
+	Logger *logger.Logger
+	ReadDb *gorm.DB
 }
 
 type User struct {
@@ -23,16 +21,9 @@ type User struct {
 
 func (u *UserRepository) Info(id int32) (User, error) {
 	var ret User
-	if err := u.readDb.Where("id=?", id).First(&ret).Error; err != nil {
-		u.logger.Errorf("user id %d info error: %s", id, err.Error())
+	if err := u.ReadDb.Where("id=?", id).First(&ret).Error; err != nil {
+		u.Logger.Errorf("user id %d info error: %s", id, err.Error())
 		return ret, err
 	}
 	return ret, nil
-}
-
-func New(options Options) *UserRepository {
-	return &UserRepository{
-		logger: options.Logger,
-		readDb: options.ReadDb,
-	}
 }

@@ -22,14 +22,14 @@ func (a *Action) Info(c *gin.Context) {
 		})
 		return
 	}
-	user, err := a.userService.Info(req.Id)
+	user, err := a.UserService.Info(req.Id)
 	if err != nil {
 		response.Fail(c, map[string]any{
 			"msg": err.Error(),
 		})
 		return
 	}
-	a.logger.Infof("%+v%+v", req, user)
+	a.Logger.Infof("%+v%+v", req, user)
 	response.Success(c, map[string]any{
 		"data": user,
 	})

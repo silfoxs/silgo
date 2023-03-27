@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func New() (*gorm.DB, error) {
+func New() (*gorm.DB, func(), error) {
 	db := &Mysql{
 		Host:     viper.GetString("mysql.read.host"),
 		Port:     viper.GetInt("mysql.read.port"),
@@ -15,7 +15,7 @@ func New() (*gorm.DB, error) {
 	}
 	con, err := db.New()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return con, nil
+	return con, nil, nil
 }

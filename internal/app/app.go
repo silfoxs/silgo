@@ -15,7 +15,9 @@ func Run() {
 	pid := os.Getpid()
 	injector, _, err := BuildInjector()
 	if err != nil {
-		fmt.Printf("pid:%d build injector error: %s", pid, err.Error())
+		panic(
+			fmt.Sprintf("pid:%d build injector error: %s", pid, err.Error()),
+		)
 	}
 	go func() {
 		if err := injector.Server.ListenAndServe(); err != nil {

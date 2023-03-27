@@ -7,6 +7,10 @@
 package app
 
 import (
+	user3 "github.com/silfoxs/silgo/internal/app/action/user"
+	"github.com/silfoxs/silgo/internal/app/repository/user"
+	"github.com/silfoxs/silgo/internal/app/router"
+	user2 "github.com/silfoxs/silgo/internal/app/service/user"
 	"github.com/silfoxs/silgo/internal/pkg/database"
 	"github.com/silfoxs/silgo/internal/pkg/http"
 	"github.com/silfoxs/silgo/internal/pkg/logger"
@@ -19,13 +23,28 @@ func BuildInjector() (*Injector, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	db, err := database.New()
+	db, cleanup2, err := database.New()
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	server, err := http.NewHttp(loggerLogger, db)
+	userRepository := &user.UserRepository{
+		Logger: loggerLogger,
+		ReadDb: db,
+	}
+	userService := &user2.UserService{
+		UserRepo: userRepository,
+	}
+	action := user3.Action{
+		Logger:      loggerLogger,
+		UserService: userService,
+	}
+	routerRouter := &router.Router{
+		UserAction: action,
+	}
+	server, cleanup3, err := http.NewHttp(loggerLogger, routerRouter)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
@@ -33,8 +52,11 @@ func BuildInjector() (*Injector, func(), error) {
 		Logger: loggerLogger,
 		Db:     db,
 		Server: server,
+		router: routerRouter,
 	}
 	return injector, func() {
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }
